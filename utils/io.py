@@ -1,90 +1,101 @@
-# utils/io.py
 from __future__ import annotations
 import os
-import glob
+import json
+from pathlib import Path
+from typing import Tuple
+
 import pandas as pd
-from typing import Dict, List
 
-# Dtypes d'après l'exemple fourni (séparateur ; dans les CSV officiels)
-DTYPES: Dict[str, str] = {
-    "LIEU_RESID": "string", "LIEU_TRAV": "string",
-    "MODTRANS": "string", "AGEREVQ": "string", "CS1": "string",
-    "DIPL": "string", "EMPL": "string", "ILT": "string", "ILTUU": "string",
-    "IMMI": "string", "INATC": "string", "INEEM": "string", "INPOM": "string",
-    "MOCO": "string", "NA5": "string", "NPERR": "string", "SEXE": "string",
-    "STAT": "string", "STOCD": "string", "TP": "string", "TYPL": "string",
-    "TYPMR": "string", "VOIT": "string",
-    "DEP_RESID": "string", "REG_RESID": "string", "CATEAAV20_RESID": "string",
-    "TAAV2017_RESID": "string", "DENS7_2025_RESID": "string", "EPCI_EPT_RESID": "string",
-    "ZE2020_RESID": "string", "AAV20_RESID": "string",
-    "DEP_TRAV": "string", "REG_TRAV": "string", "CATEAAV20_TRAV": "string",
-    "TAAV2017_TRAV": "string", "DENS7_2025_TRAV": "string", "EPCI_EPT_TRAV": "string",
-    "ZE2020_TRAV": "string", "AAV20_TRAV": "string",
-}
+ASSETS_DIR = Path(__file__).resolve().parents[1] / "assets"
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+DEPARTEMENTS_GEOJSON = ASSETS_DIR / "departements.geojson"
 
-NUM_DTYPES = {
-    "IPONDI": "float64", "DIST": "float64", "DUREE": "float64",
-    "DIST_HEBDO": "float64", "CARBU_HEBDO": "float64", "CO2_HEBDO": "float64"
-}
 
-BOOL_DTYPES = {"CHAMP_CO2": "boolean"}
-
-def _read_one_csv(path: str, year_from_name: bool = True) -> pd.DataFrame:
-    # Les fichiers officiels utilisent ; et virgule comme séparateur décimal
-    df = pd.read_csv(path, sep=";", dtype=DTYPES, low_memory=False, decimal=",")
-    
-    # Conversion manuelle des colonnes numériques
-    for col, dtype in NUM_DTYPES.items():
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce').astype(dtype)
-    
-    # Tolérance si certains champs bool viennent en 0/1
-    if "CHAMP_CO2" in df.columns:
-        if df["CHAMP_CO2"].dtype != "boolean":
-            df["CHAMP_CO2"] = df["CHAMP_CO2"].astype("Int64").astype("boolean", errors="ignore")
-
-    # Détecte l'année à partir du nom (ex: ..._2022.csv). Sinon essaie une colonne ANNEE si présente.
-    year = None
-    if year_from_name:
-        for token in os.path.basename(path).split("_"):
-            if token.isdigit() and len(token) in (4,):
-                year = int(token)
-    if "ANNEE" in df.columns and df["ANNEE"].notna().any():
-        df["ANNEE"] = df["ANNEE"].astype("Int64")
-    else:
-        df["ANNEE"] = year if year is not None else pd.NA
-    return df
-
-def load_data(data_dir: str = "data") -> pd.DataFrame:
+def _coerce_number(x):
     """
-    Charge 1..N fichiers. Si aucun n'est trouvé, essaie un échantillon déposé par toi.
-    Concatène proprement et retourne un DataFrame unique.
+    Convert French-formatted numbers like "1 234" to int, handle 's' or blanks as NaN.
     """
-    patterns: List[str] = [
-        os.path.join(data_dir, "depl_dom_trav_co2_*.csv"),
-        os.path.join(data_dir, "depl_dom_trav_co2.csv"),
-    ]
-    paths: List[str] = []
-    for pat in patterns:
-        paths.extend(sorted(glob.glob(pat)))
+    if pd.isna(x):
+        return pd.NA
+    if isinstance(x, str):
+        xs = x.strip()
+        if xs.lower() in {"s", "", "nan", "na"}:
+            return pd.NA
+        # remove spaces used as thousands separators
+        xs = xs.replace("\xa0", " ").replace(" ", "")
+        xs = xs.replace(",", ".")  # just in case
+        if xs == "":
+            return pd.NA
+        try:
+            if "." in xs:
+                return float(xs)
+            return int(xs)
+        except Exception:
+            return pd.NA
+    return x
 
-    # Fallback vers l'échantillon de l'espace de travail (utile en dev local / notebook)
-    if not paths:
-        sample = "/mnt/data/sample_depl_dom_trav_co2_2022.csv"
-        if os.path.exists(sample):
-            paths = [sample]
-        else:
-            raise FileNotFoundError(
-                "Aucun CSV trouvé dans ./data. Place au moins un fichier 'depl_dom_trav_co2_YYYY.csv'."
-            )
 
-    frames = [_read_one_csv(p) for p in paths]
-    df = pd.concat(frames, ignore_index=True)
-    # Normalise les codes région à 2 chiffres (ex: '11', '84', etc.)
-    if "REG_RESID" in df.columns:
-        df["REG_RESID"] = df["REG_RESID"].astype("string").str.zfill(2)
-    if "REG_TRAV" in df.columns:
-        df["REG_TRAV"] = df["REG_TRAV"].astype("string").str.zfill(2)
-    return df
+def read_csv_safely(path: Path) -> pd.DataFrame:
+    encodings = ["cp1252", "latin-1", "utf-8"]
+    last_err = None
+    for enc in encodings:
+        try:
+            df = pd.read_csv(path, sep=";", encoding=enc, dtype=str)
+            return df
+        except Exception as e:
+            last_err = e
+            continue
+    raise RuntimeError(f"Failed to read {path}: {last_err}")
 
-LICENSE = "© Insee & SDES — Données publiques, diffusion selon leurs conditions. CO₂ exprimé en gCO₂e."
+
+def load_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Load department and commune CSVs from data/ and return raw dataframes (string dtypes).
+    This function does not mutate files and is cached by Streamlit at call site.
+    """
+    dep_path = DATA_DIR / "lovac_opendata_dep.csv"
+    com_path = DATA_DIR / "lovac-opendata-communes.csv"
+
+    if not dep_path.exists():
+        raise FileNotFoundError(f"Missing file: {dep_path}")
+    if not com_path.exists():
+        raise FileNotFoundError(f"Missing file: {com_path}")
+
+    df_dep_raw = read_csv_safely(dep_path)
+    df_com_raw = read_csv_safely(com_path)
+
+    # Normalize column names: strip spaces and unify case
+    df_dep_raw.columns = [c.strip().replace(" ", "_") for c in df_dep_raw.columns]
+    df_com_raw.columns = [c.strip().replace(" ", "_") for c in df_com_raw.columns]
+
+    # Strip whitespace in all string cells (element-wise)
+    df_dep_raw = df_dep_raw.map(lambda v: v.strip() if isinstance(v, str) else v)
+    df_com_raw = df_com_raw.map(lambda v: v.strip() if isinstance(v, str) else v)
+
+    return df_dep_raw, df_com_raw
+
+
+def ensure_departements_geojson() -> Path | None:
+    """
+    Ensure we have a departments GeoJSON locally. If missing, attempt to download
+    from a well-known public mirror. If download fails, return None.
+    """
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    if DEPARTEMENTS_GEOJSON.exists():
+        return DEPARTEMENTS_GEOJSON
+
+    # Lazy import to avoid hard dependency on requests when not needed
+    try:
+        import requests  # type: ignore
+    except Exception:
+        return None
+
+    url = "https://france-geojson.gregoiredavid.fr/repo/departements.geojson"
+    try:
+        resp = requests.get(url, timeout=20)
+        resp.raise_for_status()
+        with open(DEPARTEMENTS_GEOJSON, "wb") as f:
+            f.write(resp.content)
+        return DEPARTEMENTS_GEOJSON
+    except Exception:
+        return None
