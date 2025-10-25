@@ -20,22 +20,26 @@ def _theme_chart(c: alt.Chart) -> alt.Chart:
 def line_chart_timeseries(df: pd.DataFrame, x: str, y: str, color: Optional[str] = None, tooltip: Optional[list] = None, title: str = ""):
     tooltip = tooltip or [x, y]
     base = alt.Chart(df)
-    c = base.mark_line(point=True).encode(
-        x=alt.X(x, title="Year"),
-        y=alt.Y(y, title=title or y, scale=alt.Scale(zero=False)),
-        color=color,
-        tooltip=tooltip,
-    )
+    enc = {
+        "x": alt.X(x, title="Year"),
+        "y": alt.Y(y, title=title or y, scale=alt.Scale(zero=False)),
+        "tooltip": tooltip,
+    }
+    if color:
+        enc["color"] = color
+    c = base.mark_line(point=True).encode(**enc)
     return _theme_chart(c)
 
 
 def bar_chart(df: pd.DataFrame, x: str, y: str, color: Optional[str] = None, sort: str = "-y", title: str = ""):
-    c = alt.Chart(df).mark_bar().encode(
-        x=alt.X(x, sort=sort, title=x),
-        y=alt.Y(y, title=title or y),
-        color=color,
-        tooltip=[x, y] + ([color] if color else []),
-    )
+    enc = {
+        "x": alt.X(x, sort=sort, title=x),
+        "y": alt.Y(y, title=title or y),
+        "tooltip": [x, y] + ([color] if color else []),
+    }
+    if color:
+        enc["color"] = color
+    c = alt.Chart(df).mark_bar().encode(**enc)
     return _theme_chart(c)
 
 
