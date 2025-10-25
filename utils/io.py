@@ -1,101 +1,139 @@
-from __future__ import annotations
-import os
-import json
-from pathlib import Path
-from typing import Tuple
-
+"""
+Data loading utilities for vacant housing data.
+Handles data ingestion with caching and error handling.
+"""
 import pandas as pd
-
-ASSETS_DIR = Path(__file__).resolve().parents[1] / "assets"
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-DEPARTEMENTS_GEOJSON = ASSETS_DIR / "departements.geojson"
+import streamlit as st
+from pathlib import Path
 
 
-def _coerce_number(x):
+@st.cache_data(show_spinner=False)
+def load_department_data():
     """
-    Convert French-formatted numbers like "1 234" to int, handle 's' or blanks as NaN.
+    Load department-level vacant housing data.
+    
+    Returns:
+        pd.DataFrame: Cleaned department data
     """
-    if pd.isna(x):
-        return pd.NA
-    if isinstance(x, str):
-        xs = x.strip()
-        if xs.lower() in {"s", "", "nan", "na"}:
-            return pd.NA
-        # remove spaces used as thousands separators
-        xs = xs.replace("\xa0", " ").replace(" ", "")
-        xs = xs.replace(",", ".")  # just in case
-        if xs == "":
-            return pd.NA
-        try:
-            if "." in xs:
-                return float(xs)
-            return int(xs)
-        except Exception:
-            return pd.NA
-    return x
-
-
-def read_csv_safely(path: Path) -> pd.DataFrame:
-    encodings = ["cp1252", "latin-1", "utf-8"]
-    last_err = None
-    for enc in encodings:
-        try:
-            df = pd.read_csv(path, sep=";", encoding=enc, dtype=str)
-            return df
-        except Exception as e:
-            last_err = e
-            continue
-    raise RuntimeError(f"Failed to read {path}: {last_err}")
-
-
-def load_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Load department and commune CSVs from data/ and return raw dataframes (string dtypes).
-    This function does not mutate files and is cached by Streamlit at call site.
-    """
-    dep_path = DATA_DIR / "lovac_opendata_dep.csv"
-    com_path = DATA_DIR / "lovac-opendata-communes.csv"
-
-    if not dep_path.exists():
-        raise FileNotFoundError(f"Missing file: {dep_path}")
-    if not com_path.exists():
-        raise FileNotFoundError(f"Missing file: {com_path}")
-
-    df_dep_raw = read_csv_safely(dep_path)
-    df_com_raw = read_csv_safely(com_path)
-
-    # Normalize column names: strip spaces and unify case
-    df_dep_raw.columns = [c.strip().replace(" ", "_") for c in df_dep_raw.columns]
-    df_com_raw.columns = [c.strip().replace(" ", "_") for c in df_com_raw.columns]
-
-    # Strip whitespace in all string cells (element-wise)
-    df_dep_raw = df_dep_raw.map(lambda v: v.strip() if isinstance(v, str) else v)
-    df_com_raw = df_com_raw.map(lambda v: v.strip() if isinstance(v, str) else v)
-
-    return df_dep_raw, df_com_raw
-
-
-def ensure_departements_geojson() -> Path | None:
-    """
-    Ensure we have a departments GeoJSON locally. If missing, attempt to download
-    from a well-known public mirror. If download fails, return None.
-    """
-    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    if DEPARTEMENTS_GEOJSON.exists():
-        return DEPARTEMENTS_GEOJSON
-
-    # Lazy import to avoid hard dependency on requests when not needed
+    data_path = Path(__file__).parent.parent / "data" / "lovac_opendata_dep.csv"
+    
     try:
-        import requests  # type: ignore
-    except Exception:
-        return None
+        df = pd.read_csv(
+            data_path,
+            sep=";",
+            encoding="latin-1",  # French characters use Latin-1 encoding
+            dtype={"DEP": str}
+        )
+        
+        # Clean column names (remove spaces)
+        df.columns = df.columns.str.strip()
+        
+        # Clean data values (remove spaces from numeric columns)
+        for col in df.columns:
+            if col not in ['DEP', 'LIB_DEP']:
+                df[col] = df[col].astype(str).str.strip().str.replace(' ', '')
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Clean text columns
+        df['LIB_DEP'] = df['LIB_DEP'].str.strip()
+        df['DEP'] = df['DEP'].str.strip()
+        
+        return df
+    
+    except Exception as e:
+        st.error(f"Error loading department data: {str(e)}")
+        return pd.DataFrame()
 
-    url = "https://france-geojson.gregoiredavid.fr/repo/departements.geojson"
+
+@st.cache_data(show_spinner=False)
+def load_commune_data():
+    """
+    Load commune-level vacant housing data.
+    
+    Returns:
+        pd.DataFrame: Cleaned commune data
+    """
+    data_path = Path(__file__).parent.parent / "data" / "lovac-opendata-communes.csv"
+    
     try:
-        resp = requests.get(url, timeout=20)
-        resp.raise_for_status()
-        with open(DEPARTEMENTS_GEOJSON, "wb") as f:
-            f.write(resp.content)
-        return DEPARTEMENTS_GEOJSON
-    except Exception:
-        return None
+        df = pd.read_csv(
+            data_path,
+            sep=";",
+            encoding="latin-1",  # French characters use Latin-1 encoding
+            dtype={"CODGEO_25": str, "DEP": str, "EPCI_25": str}
+        )
+        
+        # Clean column names
+        df.columns = df.columns.str.strip()
+        
+        # Handle 's' (secret/suppressed) values - replace with NaN
+        for col in df.columns:
+            if col.startswith('pp_'):
+                df[col] = df[col].replace('s', pd.NA)
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Clean text columns
+        for col in ['LIBGEO_25', 'LIB_EPCI_25', 'LIB_DEP', 'LIB_REG']:
+            if col in df.columns:
+                df[col] = df[col].str.strip()
+        
+        df['DEP'] = df['DEP'].str.strip()
+        df['CODGEO_25'] = df['CODGEO_25'].str.strip()
+        
+        return df
+    
+    except Exception as e:
+        st.error(f"Error loading commune data: {str(e)}")
+        return pd.DataFrame()
+
+
+def get_data_license():
+    """
+    Return data license and attribution information.
+    
+    Returns:
+        str: License text
+    """
+    return """
+    **Data Source**: LOVAC (Logements Vacants) - French Open Data  
+    **Portal**: data.gouv.fr  
+    **License**: Open License 2.0 (Licence Ouverte)  
+    **Attribution**: Data provided by the French government - freely reusable with attribution  
+    **Last Updated**: 2025  
+    
+    This data is provided under the Open License 2.0, which allows for free reuse, 
+    modification, and distribution with proper attribution.
+    """
+
+
+def get_data_description():
+    """
+    Return detailed data description and methodology.
+    
+    Returns:
+        dict: Data description information
+    """
+    return {
+        "title": "French Vacant Housing Observatory (LOVAC)",
+        "description": """
+        This dataset tracks vacant housing units across France from 2020 to 2025.
+        Data is collected from tax records and census information, providing insights
+        into housing availability and potential waste of housing resources.
+        """,
+        "metrics": {
+            "pp_total": "Total number of properties (principal residences + secondary + vacant)",
+            "pp_vacant": "Number of vacant properties",
+            "pp_vacant_plus_2ans": "Number of properties vacant for 2+ years (structural vacancy)"
+        },
+        "granularity": {
+            "department": "101 French departments (métropole + overseas)",
+            "commune": "~35,000 French communes (municipalities)"
+        },
+        "time_period": "2020-2025 (annual data)",
+        "limitations": [
+            "Small values are suppressed with 's' to protect privacy",
+            "Overseas territories may have incomplete data",
+            "Vacancy definitions may vary slightly by jurisdiction",
+            "Data relies on tax declarations which may lag actual occupancy"
+        ]
+    }

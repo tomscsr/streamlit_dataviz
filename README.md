@@ -1,53 +1,253 @@
-# Streamlit Data Storytelling — Vacant Housing in France
+# 🏠 France's Vacant Housing Crisis - Data Storytelling Dashboard
 
-This app explores vacancy trends across French departments and regions using LOVAC open data (commune-level and department-level CSVs).
+An interactive data storytelling application analyzing vacant housing patterns across France from 2020 to 2025. This Streamlit dashboard provides comprehensive insights into the geography, trends, and policy implications of France's vacant housing landscape.
 
-## What you get
-- Narrative-driven dashboard (hook → analysis → insights → implications)
-- Sidebar filters (region, year range, metric)
-- 3+ interactive visuals:
-  - Line trends (national and within-region)
-  - Regional comparison bars (latest year)
-  - Department map (choropleth) — auto-downloads GeoJSON on first run; falls back to small multiples if offline
-- KPI header tied to filters
-- Data quality panel (missingness, validation)
-- Cached data and efficient pre-aggregation
+![Dashboard Preview](https://img.shields.io/badge/Streamlit-1.33+-FF4B4B?style=flat&logo=streamlit&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-Open%20License%202.0-green)
 
-## Run locally
+## 📊 Overview
 
-1. Create a Python environment and install dependencies:
+France faces a housing paradox: while millions struggle to find affordable housing, hundreds of thousands of properties sit empty—some for years. This dashboard explores:
 
-```powershell
-python -m venv .venv; .\.venv\Scripts\Activate.ps1
+- **The Scale**: How many vacant properties exist and where?
+- **The Trend**: Is vacancy increasing or decreasing over time?
+- **The Geography**: Which regions are most affected?
+- **The Chronicity**: How many properties are vacant long-term (2+ years)?
+- **The Implications**: What does this mean for housing policy?
+
+## 🎯 Features
+
+### Multiple Interactive Pages
+
+1. **🏠 Introduction**
+   - Context and background on housing vacancy
+   - Data description and methodology
+   - Limitations and ethical considerations
+
+2. **🇫🇷 National Overview**
+   - High-level KPIs and trends (2020-2025)
+   - Time series analysis of vacancy patterns
+   - Year-over-year change analysis
+   - National summary statistics
+
+3. **🗺️ Departmental Analysis**
+   - Compare all 101 French departments
+   - Rankings by vacancy rate and absolute numbers
+   - Distribution analysis and outlier detection
+   - Interactive filtering and time selection
+   - Department-to-department comparisons
+
+4. **🏘️ Commune Deep Dive**
+   - Municipal-level insights (~35,000 communes)
+   - Filter by region and department
+   - Analysis by commune size class
+   - Search functionality for specific communes
+   - Top/bottom performers
+
+5. **📋 Conclusions**
+   - Key findings and insights
+   - Policy recommendations (urban vs. rural)
+   - Targeted interventions for long-term vacancy
+   - Limitations and future research directions
+
+### Visualization Types
+
+- **Line charts**: Time series trends
+- **Bar charts**: Rankings and comparisons
+- **Scatter plots**: Correlation analysis
+- **Histograms**: Distribution analysis
+- **Box plots**: Statistical summaries
+- **Interactive filters**: Dynamic data exploration
+
+### Data Quality
+
+- Transparent handling of suppressed values
+- Data quality reports and validation
+- Clear documentation of limitations
+- Privacy-preserving aggregation
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8 or higher
+- pip package manager
+
+### Installation
+
+1. **Clone or download this repository**
+
+```bash
+cd streamlit_dataviz
+```
+
+2. **Install dependencies**
+
+```bash
 pip install -r requirements.txt
 ```
 
-2. Launch the app:
+3. **Verify data files exist**
 
-```powershell
+Ensure the following files are in the `data/` folder:
+- `lovac_opendata_dep.csv` (Department-level data)
+- `lovac-opendata-communes.csv` (Commune-level data)
+
+4. **Run the application**
+
+```bash
 streamlit run app.py
 ```
 
-If you see a warning about missing `departements.geojson`, the app will download it automatically (internet required). Without it, a small-multiples fallback is shown.
+5. **Open in browser**
 
-## Data
-- `data/lovac_opendata_dep.csv` — department-level counts of total dwellings, vacant dwellings, and long-term vacant (>2 years) across 2020–2025.
-- `data/lovac-opendata-communes.csv` — commune-level counts with region and department labels.
+The app will automatically open in your default browser at `http://localhost:8501`
 
-CSV specifics:
-- Separator: `;`
-- Encoding: cp1252/latin-1 (the app auto-detects)
-- Missing values: `s` means suppressed; treated as NA
-- Numbers may include spaces as thousands separators; the app normalizes those.
+## 📁 Project Structure
 
-## Accessibility
-- Clear axes, labels, and consistent color scales
-- Alt text via captions and chart titles
+```
+streamlit_dataviz/
+├── app.py                          # Main application entry point
+├── requirements.txt                # Python dependencies
+├── README.md                       # This file
+│
+├── data/                           # Data files (CSV)
+│   ├── lovac_opendata_dep.csv      # Department-level data
+│   └── lovac-opendata-communes.csv # Commune-level data
+│
+├── sections/                       # Page modules
+│   ├── intro.py                    # Introduction page
+│   ├── overview.py                 # National overview
+│   ├── departmental.py             # Department analysis
+│   ├── commune.py                  # Commune analysis
+│   └── conclusions.py              # Conclusions & insights
+│
+├── utils/                          # Utility modules
+│   ├── io.py                       # Data loading functions
+│   ├── prep.py                     # Data preprocessing
+│   └── viz.py                      # Visualization functions
+│
+└── assets/                         # Static assets (optional)
+```
 
-## License and attribution
-- Data source: LOVAC Open Data (public portal). Please verify license on the portal before redistribution.
-- Code: MIT (adapt as needed).
+## 📊 Data Source
 
-## Notes
-- Map uses Plotly choropleth with a public France departments GeoJSON (`assets/departements.geojson`).
-- For a full commune-level map, provide latitude/longitude or a communes GeoJSON and extend `utils/viz.py` accordingly.
+**Dataset**: LOVAC (Logements Vacants) - French Vacant Housing Observatory  
+**Portal**: [data.gouv.fr](https://www.data.gouv.fr)  
+**License**: Open License 2.0 (Licence Ouverte)  
+**Coverage**: 2020-2025 (annual data)  
+**Granularity**: 
+- 101 departments (métropole + overseas)
+- ~35,000 communes (municipalities)
+
+### Metrics Tracked
+
+- `pp_total`: Total number of properties
+- `pp_vacant`: Number of vacant properties
+- `pp_vacant_plus_2ans`: Properties vacant for 2+ years (structural vacancy)
+
+### Data Limitations
+
+- Small values suppressed with 's' to protect privacy
+- Overseas territories may have incomplete data
+- Data relies on tax declarations (potential lag)
+- Vacancy definitions may vary by jurisdiction
+
+## 🎨 Key Insights
+
+1. **The Two Frances**: Urban shortage vs. rural surplus
+2. **Chronic Vacancy**: Over 50% vacant for 2+ years
+3. **Growing Problem**: Vacancy increasing faster than housing stock
+4. **Local Variation**: Significant differences even within regions
+5. **Size Matters**: Smaller communes face greatest challenges
+
+## 🛠️ Technical Details
+
+### Performance Optimizations
+
+- **Caching**: `@st.cache_data` for expensive operations
+- **Pre-aggregation**: National/department summaries computed once
+- **Efficient filtering**: Pandas operations optimized
+- **Lazy loading**: Data loaded only when needed
+
+### Best Practices Implemented
+
+✅ Modular code structure (sections, utils)  
+✅ Consistent styling (centralized color scheme)  
+✅ Error handling and user feedback  
+✅ Responsive design (works on desktop/tablet)  
+✅ Accessible visualizations (alt text, labels)  
+✅ Reproducible analysis (deterministic)  
+✅ Documented assumptions and limitations  
+
+## 📈 Usage Examples
+
+### Explore National Trends
+Navigate to "🇫🇷 National Overview" to see:
+- 6-year trend of vacancy rates
+- KPIs with year-over-year changes
+- Growth rate analysis
+
+### Compare Departments
+Go to "🗺️ Departmental Analysis" to:
+- Rank departments by vacancy
+- Compare multiple departments over time
+- Identify outliers and patterns
+
+### Find Specific Communes
+Use "🏘️ Commune Deep Dive" to:
+- Filter by region/department
+- Search by commune name
+- Analyze by population size
+
+### Understand Policy Context
+Read "📋 Conclusions" for:
+- Evidence-based recommendations
+- Differentiated strategies (urban/rural)
+- Future research directions
+
+## 🤝 Contributing
+
+This is an academic project. Suggestions for improvements:
+
+- Additional visualizations (maps with geographic boundaries)
+- Integration with demographic/economic data
+- Predictive modeling features
+- Export functionality (reports, charts)
+- Multi-language support
+
+## 📄 License
+
+**Code**: This application code is provided for educational purposes.  
+**Data**: LOVAC data is licensed under Open License 2.0 (Licence Ouverte)  
+**Attribution**: Data provided by the French government via data.gouv.fr
+
+## 🙏 Acknowledgments
+
+- **Data Provider**: French Government Open Data Portal
+- **Framework**: Streamlit community
+- **Visualization**: Plotly team
+- **Inspiration**: Data storytelling best practices
+
+## 📧 Contact
+
+For questions or feedback about this dashboard, please open an issue in the repository.
+
+---
+
+**Built with** ❤️ **using Streamlit**  
+**Last Updated**: 2025
+
+## 🎓 Educational Context
+
+This dashboard was created as part of a data storytelling project with the following learning objectives:
+
+- Frame a data question and turn it into a story arc
+- Ingest, clean, and validate open data
+- Build interactive dashboards with clear UX
+- Apply EDA and analytics techniques
+- Communicate insights visually
+- Package and ship reproducible applications
+
+**Key Narrative Pattern**: Before/After change over time + Geographic comparison + Rankings & distribution
