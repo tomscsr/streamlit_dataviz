@@ -1,12 +1,8 @@
-# 🏠 France's Vacant Housing Crisis - Data Storytelling Dashboard
+#  France's Vacant Housing Crisis - Data Storytelling Dashboard
 
 An interactive data storytelling application analyzing vacant housing patterns across France from 2020 to 2025. This Streamlit dashboard provides comprehensive insights into the geography, trends, and policy implications of France's vacant housing landscape.
 
-![Dashboard Preview](https://img.shields.io/badge/Streamlit-1.33+-FF4B4B?style=flat&logo=streamlit&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-Open%20License%202.0-green)
-
-## 📊 Overview
+##  Overview
 
 France faces a housing paradox: while millions struggle to find affordable housing, hundreds of thousands of properties sit empty—some for years. This dashboard explores:
 
@@ -16,36 +12,36 @@ France faces a housing paradox: while millions struggle to find affordable housi
 - **The Chronicity**: How many properties are vacant long-term (2+ years)?
 - **The Implications**: What does this mean for housing policy?
 
-## 🎯 Features
+##  Features
 
 ### Multiple Interactive Pages
 
-1. **🏠 Introduction**
+1. ** Introduction**
    - Context and background on housing vacancy
    - Data description and methodology
    - Limitations and ethical considerations
 
-2. **🇫🇷 National Overview**
+2. ** National Overview**
    - High-level KPIs and trends (2020-2025)
    - Time series analysis of vacancy patterns
    - Year-over-year change analysis
    - National summary statistics
 
-3. **🗺️ Departmental Analysis**
+3. ** Departmental Analysis**
    - Compare all 101 French departments
    - Rankings by vacancy rate and absolute numbers
    - Distribution analysis and outlier detection
    - Interactive filtering and time selection
    - Department-to-department comparisons
 
-4. **🏘️ Commune Deep Dive**
+4. ** Commune Deep Dive**
    - Municipal-level insights (~35,000 communes)
    - Filter by region and department
    - Analysis by commune size class
    - Search functionality for specific communes
    - Top/bottom performers
 
-5. **📋 Conclusions**
+5. ** Conclusions**
    - Key findings and insights
    - Policy recommendations (urban vs. rural)
    - Targeted interventions for long-term vacancy
@@ -67,7 +63,7 @@ France faces a housing paradox: while millions struggle to find affordable housi
 - Clear documentation of limitations
 - Privacy-preserving aggregation
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -93,7 +89,7 @@ pip install -r requirements.txt
 Option A — download with script (recommended):
 
 ```powershell
-# Set dataset URLs (replace with official data.gouv.fr resource URLs)
+# Set dataset URLs
 $env:LOVAC_DEPT_URL = "https://.../lovac_opendata_dep.csv"
 $env:LOVAC_COMMUNE_URL = "https://.../lovac-opendata-communes.csv"
 python scripts/data_download.py
@@ -115,7 +111,7 @@ streamlit run app.py
 
 The app will automatically open in your default browser at `http://localhost:8501`
 
-## ♻️ Reproducibility & Packaging
+##  Reproducibility & Packaging
 
 - Dependencies are pinned in `requirements.txt` for deterministic installs.
 - Simple run instructions are provided above (no Makefile required). If you prefer a one-liner workflow, you can:
@@ -127,7 +123,7 @@ python -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.
 - A small `scripts/data_download.py` fetches the CSVs using environment variables or CLI flags and caches to `data/` (skips if files already exist).
 - `seeds.json` contains deterministic constants (e.g., random seed) should you add any sampling or randomized examples later.
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 streamlit_dataviz/
@@ -154,7 +150,7 @@ streamlit_dataviz/
 └── assets/                         # Static assets (optional)
 ```
 
-## 📊 Data Source
+##  Data Source
 
 **Dataset**: LOVAC (Logements Vacants) - French Vacant Housing Observatory  
 **Portal**: [data.gouv.fr](https://www.data.gouv.fr)  
@@ -178,7 +174,7 @@ streamlit_dataviz/
 - Data relies on tax declarations (potential lag)
 - Vacancy definitions may vary by jurisdiction
 
-## 🎨 Key Insights
+##  Key Insights
 
 1. **The Two Frances**: Urban shortage vs. rural surplus
 2. **Chronic Vacancy**: Over 50% vacant for 2+ years
@@ -186,7 +182,7 @@ streamlit_dataviz/
 4. **Local Variation**: Significant differences even within regions
 5. **Size Matters**: Smaller communes face greatest challenges
 
-## 🛠️ Technical Details
+##  Technical Details
 
 ### Performance Optimizations
 
@@ -197,15 +193,15 @@ streamlit_dataviz/
 
 ### Best Practices Implemented
 
-✅ Modular code structure (sections, utils)  
-✅ Consistent styling (centralized color scheme)  
-✅ Error handling and user feedback  
-✅ Responsive design (works on desktop/tablet)  
-✅ Accessible visualizations (alt text, labels)  
-✅ Reproducible analysis (deterministic)  
-✅ Documented assumptions and limitations  
+ Modular code structure (sections, utils)  
+ Consistent styling (centralized color scheme)  
+ Error handling and user feedback  
+ Responsive design (works on desktop/tablet)  
+ Accessible visualizations (alt text, labels)  
+ Reproducible analysis (deterministic)  
+ Documented assumptions and limitations  
 
-## 📈 Usage Examples
+##  Usage Examples
 
 ### Explore National Trends
 Navigate to "🇫🇷 National Overview" to see:
@@ -214,24 +210,24 @@ Navigate to "🇫🇷 National Overview" to see:
 - Growth rate analysis
 
 ### Compare Departments
-Go to "🗺️ Departmental Analysis" to:
+Go to " Departmental Analysis" to:
 - Rank departments by vacancy
 - Compare multiple departments over time
 - Identify outliers and patterns
 
 ### Find Specific Communes
-Use "🏘️ Commune Deep Dive" to:
+Use " Commune Deep Dive" to:
 - Filter by region/department
 - Search by commune name
 - Analyze by population size
 
 ### Understand Policy Context
-Read "📋 Conclusions" for:
+Read " Conclusions" for:
 - Evidence-based recommendations
 - Differentiated strategies (urban/rural)
 - Future research directions
 
-## 🤝 Contributing
+##  Contributing
 
 This is an academic project. Suggestions for improvements:
 
@@ -241,29 +237,29 @@ This is an academic project. Suggestions for improvements:
 - Export functionality (reports, charts)
 - Multi-language support
 
-## 📄 License
+##  License
 
 **Code**: This application code is provided for educational purposes.  
 **Data**: LOVAC data is licensed under Open License 2.0 (Licence Ouverte)  
 **Attribution**: Data provided by the French government via data.gouv.fr
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Data Provider**: French Government Open Data Portal
 - **Framework**: Streamlit community
 - **Visualization**: Plotly team
 - **Inspiration**: Data storytelling best practices
 
-## 📧 Contact
+##  Contact
 
 For questions or feedback about this dashboard, please open an issue in the repository.
 
 ---
 
-**Built with** ❤️ **using Streamlit**  
+**Built with**  **Streamlit**  
 **Last Updated**: 2025
 
-## 🎓 Educational Context
+##  Educational Context
 
 This dashboard was created as part of a data storytelling project with the following learning objectives:
 
