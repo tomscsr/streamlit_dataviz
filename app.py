@@ -33,7 +33,7 @@ import sections.conclusions as conclusions
 # Page configuration
 st.set_page_config(
     page_title="France's Vacant Housing Crisis",
-    page_icon="🏠",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -103,18 +103,18 @@ def main():
     page = st.sidebar.radio(
         "Select a section:",
         [
-            "🏠 Introduction",
-            "🇫🇷 National Overview",
-            "🗺️ Departmental Analysis",
-            "🏘️ Commune Deep Dive",
-            "📋 Conclusions"
+            "Introduction",
+            "National Overview",
+            "Departmental Analysis",
+            "Commune Deep Dive",
+            "Conclusions"
         ],
         label_visibility="collapsed"
     )
     
     # Data quality indicator
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📊 Data Status")
+    st.sidebar.markdown("### Data Status")
     st.sidebar.success(f"""
     ✅ Department data: {quality_report['department']['total_rows']} rows  
     ✅ Commune data: {quality_report['commune']['total_rows']:,} rows  
@@ -139,10 +139,10 @@ def main():
         This interactive dashboard analyzes **vacant housing data** across France 
         from 2020 to 2025, covering:
         
-        - 🇫🇷 National trends and KPIs
-        - 🗺️ Department-level comparisons  
-        - 🏘️ Commune-level deep dives
-        - 📊 Data-driven policy insights
+        - National trends and KPIs
+        - Department-level comparisons  
+        - Commune-level deep dives
+        - Data-driven policy insights
         
         **Built with**: Streamlit, Plotly, Pandas  
         **Data**: LOVAC Open Data (data.gouv.fr)
@@ -177,19 +177,19 @@ def main():
     st.sidebar.markdown("---")
     
     # Page routing
-    if page == "🏠 Introduction":
+    if page == "Introduction":
         intro.show()
     
-    elif page == "🇫🇷 National Overview":
+    elif page == "National Overview":
         overview.show(df_dept)
     
-    elif page == "🗺️ Departmental Analysis":
+    elif page == "Departmental Analysis":
         departmental.show(df_dept)
     
-    elif page == "🏘️ Commune Deep Dive":
+    elif page == "Commune Deep Dive":
         commune.show(df_commune)
     
-    elif page == "📋 Conclusions":
+    elif page == "Conclusions":
         conclusions.show(df_dept)
     
     # Footer

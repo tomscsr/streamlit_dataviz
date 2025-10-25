@@ -27,7 +27,7 @@ def show(df_dept):
         df_dept: Department-level DataFrame
     """
     
-    st.title("🗺️ Departmental Analysis: Geographic Patterns")
+    st.title("Departmental Analysis: Geographic Patterns")
     st.markdown("### Compare vacancy rates across France's 101 departments")
     
     # Sidebar filters
@@ -63,7 +63,7 @@ def show(df_dept):
     
     # Overview metrics for selected year
     st.markdown("---")
-    st.header(f"📊 Department Statistics (20{selected_year})")
+    st.header(f"Department Statistics (20{selected_year})")
     
     # Remove rows with NaN vacancy rates for statistics
     df_snap_filtered_valid = df_snap_filtered.dropna(subset=['vacancy_rate'])
@@ -112,7 +112,7 @@ def show(df_dept):
     
     # Rankings and Comparisons
     st.markdown("---")
-    st.header("🏆 Department Rankings")
+    st.header("Department Rankings")
     
     tab1, tab2, tab3 = st.tabs(["Vacancy Rate", "Long-term Vacancy", "Absolute Numbers"])
     
@@ -237,7 +237,7 @@ def show(df_dept):
     
     # Distribution Analysis
     st.markdown("---")
-    st.header("📊 Distribution Analysis")
+    st.header("Distribution Analysis")
     
     col1, col2 = st.columns(2)
     
@@ -299,7 +299,7 @@ def show(df_dept):
     
     # Correlation Analysis
     st.markdown("---")
-    st.header("🔍 Relationship Between Metrics")
+    st.header("Relationship Between Metrics")
     
     col1, col2 = st.columns(2)
     
@@ -338,7 +338,7 @@ def show(df_dept):
     
     # Time series comparison
     st.markdown("---")
-    st.header("📈 Trends Over Time: Compare Departments")
+    st.header("Trends Over Time: Compare Departments")
     
     # Allow selection of specific departments to compare
     compare_depts = st.multiselect(
@@ -367,7 +367,7 @@ def show(df_dept):
     
     # Full data explorer
     st.markdown("---")
-    st.header("🔎 Data Explorer")
+    st.header("Data Explorer")
     
     st.subheader(f"All Departments (20{selected_year})")
     
@@ -396,7 +396,7 @@ def show(df_dept):
     
     # Key insights
     st.markdown("---")
-    st.header("💡 Key Insights")
+    st.header("Key Insights")
     
     col1, col2 = st.columns(2)
     

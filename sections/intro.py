@@ -8,12 +8,12 @@ from utils.io import get_data_license, get_data_description
 def show():
     """Display the introduction page."""
     
-    st.title("🏠 France's Vacant Housing Crisis")
+    st.title("France's Vacant Housing Crisis")
     st.markdown("### Understanding the Scale and Impact of Empty Homes Across France")
     
     # Hook - Why this matters
     st.markdown("---")
-    st.header("💡 Why This Matters")
+    st.header("Why This Matters")
     
     col1, col2 = st.columns([2, 1])
     
@@ -22,11 +22,11 @@ def show():
         **France faces a housing paradox**: while millions struggle to find affordable housing, 
         hundreds of thousands of properties sit empty—some for years. This data story explores:
         
-        - 📊 **The scale**: How many vacant properties exist and where?
-        - 📈 **The trend**: Is vacancy increasing or decreasing over time?
-        - 🗺️ **The geography**: Which regions are most affected?
-        - ⏱️ **The chronicity**: How many properties are vacant long-term (2+ years)?
-        - 💼 **The implications**: What does this mean for housing policy?
+        - **The scale**: How many vacant properties exist and where?
+        - **The trend**: Is vacancy increasing or decreasing over time?
+        - **The geography**: Which regions are most affected?
+        - **The chronicity**: How many properties are vacant long-term (2+ years)?
+        - **The implications**: What does this mean for housing policy?
         
         Understanding vacant housing is crucial for urban planning, social equity, and 
         environmental sustainability. Empty homes represent wasted resources and missed 
@@ -45,7 +45,7 @@ def show():
     
     # Context & Background
     st.markdown("---")
-    st.header("📚 Background & Context")
+    st.header("Background & Context")
     
     st.markdown("""
     ### What is Housing Vacancy?
@@ -74,7 +74,7 @@ def show():
     
     # Data Description
     st.markdown("---")
-    st.header("📊 About the Data")
+    st.header("About the Data")
     
     desc = get_data_description()
     
@@ -101,7 +101,7 @@ def show():
     
     # Data Quality & Limitations
     st.markdown("---")
-    st.header("⚠️ Data Quality & Limitations")
+    st.header("Data Quality & Limitations")
     
     st.warning("""
     **Important Considerations:**
@@ -122,13 +122,13 @@ def show():
     
     # Data License
     st.markdown("---")
-    st.header("📜 Data Source & License")
+    st.header("Data Source & License")
     
     st.markdown(get_data_license())
     
     # Methodology Note
     st.markdown("---")
-    st.header("🔬 Analytical Approach")
+    st.header("Analytical Approach")
     
     st.markdown("""
     This dashboard uses **exploratory data analysis (EDA)** and **descriptive statistics** to:
@@ -146,8 +146,8 @@ def show():
     st.markdown("---")
     st.success("""
     **Ready to explore?** Use the sidebar to navigate through different sections:
-    - 🇫🇷 **National Overview**: High-level trends and KPIs
-    - 🗺️ **Departmental Analysis**: Compare departments and regions
-    - 🏘️ **Commune Deep Dive**: Municipal-level insights
-    - 📋 **Conclusions**: Key findings and policy implications
+    - **National Overview**: High-level trends and KPIs
+    - **Departmental Analysis**: Compare departments and regions
+    - **Commune Deep Dive**: Municipal-level insights
+    - **Conclusions**: Key findings and policy implications
     """)

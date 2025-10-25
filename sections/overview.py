@@ -29,7 +29,7 @@ def show(df_dept):
     
     # KPI Header
     st.markdown("---")
-    st.header(f"📊 Key Metrics ({latest_year})")
+    st.header(f"Key Metrics ({latest_year})")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -109,7 +109,7 @@ def show(df_dept):
         longterm_rate = latest_data['longterm_vacancy_rate']
         st.metric(
             "Long-term Vacancy Rate",
-            f"{longterm_rate:.2f}%",
+            f"{longterm_rate:.2f}%" if pd.notna(longterm_rate) else "N/A",
             "Of all properties"
         )
     
@@ -117,7 +117,7 @@ def show(df_dept):
         longterm_share = latest_data['longterm_share']
         st.metric(
             "Structural Vacancy Share",
-            f"{longterm_share:.1f}%",
+            f"{longterm_share:.1f}%" if pd.notna(longterm_share) else "N/A",
             "Of vacant properties"
         )
     
@@ -142,7 +142,7 @@ def show(df_dept):
     
     # Trend Analysis
     st.markdown("---")
-    st.header("📈 Trends Over Time")
+    st.header("Trends Over Time")
     
     tab1, tab2, tab3 = st.tabs(["Vacancy Trends", "Rates & Composition", "Year-over-Year Changes"])
     
@@ -246,7 +246,7 @@ def show(df_dept):
     
     # National Summary Statistics
     st.markdown("---")
-    st.header("📊 Summary Statistics (2020-2025)")
+    st.header("Summary Statistics (2020-2025)")
     
     col1, col2 = st.columns(2)
     
@@ -282,7 +282,7 @@ def show(df_dept):
     
     # Insights
     st.markdown("---")
-    st.header("💡 Key Insights")
+    st.header("Key Insights")
     
     # Calculate some insights with NaN handling
     if (pd.notna(latest_data['total_properties']) and pd.notna(first_data['total_properties']) and 
@@ -341,7 +341,7 @@ def show(df_dept):
     st.markdown("---")
     st.info("""
     **Next Steps**: 
-    - 🗺️ Explore **Departmental Analysis** to see geographic variations
-    - 🏘️ Dive into **Commune-level** data for local patterns
-    - 📋 Review **Conclusions** for policy implications
+    - Explore **Departmental Analysis** to see geographic variations
+    - Dive into **Commune-level** data for local patterns
+    - Review **Conclusions** for policy implications
     """)

@@ -16,7 +16,7 @@ def show(df_commune):
         df_commune: Commune-level DataFrame
     """
     
-    st.title("🏘️ Commune Deep Dive: Municipal Analysis")
+    st.title("Commune Deep Dive: Municipal Analysis")
     st.markdown("### Explore vacant housing at the local level (~35,000 communes)")
     
     # Prepare commune snapshot
@@ -60,7 +60,7 @@ def show(df_commune):
     
     # Overview metrics
     st.markdown("---")
-    st.header("📊 Overview Statistics")
+    st.header("Overview Statistics")
     
     filter_desc = selected_region if selected_region != 'All Regions' else "France"
     if selected_dept != 'All Departments':
@@ -134,7 +134,7 @@ def show(df_commune):
     
     # Distribution analysis
     st.markdown("---")
-    st.header("📊 Distribution of Vacancy Rates")
+    st.header("Distribution of Vacancy Rates")
     
     col1, col2 = st.columns(2)
     
@@ -199,7 +199,7 @@ def show(df_commune):
     
     # Top and bottom communes
     st.markdown("---")
-    st.header("🏆 Top Communes")
+    st.header("Top Communes")
     
     tab1, tab2, tab3 = st.tabs(["Highest Vacancy", "Lowest Vacancy", "Largest Absolute"])
     
@@ -320,7 +320,7 @@ def show(df_commune):
     
     # Size class analysis
     st.markdown("---")
-    st.header("📏 Analysis by Commune Size")
+    st.header("Analysis by Commune Size")
     
     # Classify communes by size
     df_filtered['size_class'] = pd.cut(
@@ -377,7 +377,7 @@ def show(df_commune):
     
     # Search functionality
     st.markdown("---")
-    st.header("🔍 Search Communes")
+    st.header("Search Communes")
     
     search_term = st.text_input("Search by commune name", "")
     
@@ -420,7 +420,7 @@ def show(df_commune):
     
     # Key insights
     st.markdown("---")
-    st.header("💡 Key Insights")
+    st.header("Key Insights")
     
     st.success(f"""
     **Local Variation**

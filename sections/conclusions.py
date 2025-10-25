@@ -14,7 +14,7 @@ def show(df_dept):
         df_dept: Department-level DataFrame
     """
     
-    st.title("📋 Conclusions: Insights & Policy Implications")
+    st.title("Conclusions: Insights & Policy Implications")
     st.markdown("### What we learned and what it means for housing policy")
     
     # Prepare summary data
@@ -24,7 +24,7 @@ def show(df_dept):
     
     # Executive Summary
     st.markdown("---")
-    st.header("📊 Executive Summary")
+    st.header("Executive Summary")
     
     col1, col2 = st.columns([2, 1])
     
@@ -57,29 +57,29 @@ def show(df_dept):
         st.info(f"""
         **At a Glance (2025)**
         
-        🏠 Total Properties:  
+        **Total Properties:**  
         **{latest['total_properties']:,.0f}**
         
-        🔓 Vacant:  
+        **Vacant:**  
         **{latest['vacant_properties']:,.0f}**
         
-        📉 Vacancy Rate:  
+        **Vacancy Rate:**  
         **{latest['vacancy_rate']:.2f}%**
         
-        ⏱️ Vacant 2+ Years:  
+        **Vacant 2+ Years:**  
         **{latest['vacant_2plus_years']:,.0f}**
         
-        📊 Long-term Rate:  
+        **Long-term Rate:**  
         **{latest['longterm_vacancy_rate']:.2f}%**
         """)
     
     # Major Insights
     st.markdown("---")
-    st.header("💡 Major Insights")
+    st.header("Major Insights")
     
     insights = [
         {
-            "title": "🎯 The Two Frances: Urban Shortage vs. Rural Surplus",
+            "title": "The Two Frances: Urban Shortage vs. Rural Surplus",
             "content": """
             France exhibits a **dual housing crisis**:
             - **Growing urban areas** (Paris region, Lyon, Toulouse, etc.) face housing shortages with vacancy rates below 7%
@@ -90,7 +90,7 @@ def show(df_dept):
             """
         },
         {
-            "title": "⏰ Chronic Vacancy Indicates Market Failure",
+            "title": "Chronic Vacancy Indicates Market Failure",
             "content": """
             Over **half of vacant properties** have been empty for 2+ years. This isn't normal market 
             churn—it's structural dysfunction caused by:
@@ -104,7 +104,7 @@ def show(df_dept):
             """
         },
         {
-            "title": "📈 Vacancy Growing Faster Than Housing Stock",
+            "title": "Vacancy Growing Faster Than Housing Stock",
             "content": """
             While France's housing stock grew steadily from 2020-2025, vacant properties increased 
             at a faster rate in many regions—suggesting market inefficiencies are worsening.
@@ -114,7 +114,7 @@ def show(df_dept):
             """
         },
         {
-            "title": "🏘️ Small Communes Face Greatest Challenges",
+            "title": "Small Communes Face Greatest Challenges",
             "content": """
             Communes with fewer than 500 properties show the highest vacancy rates—often exceeding 15%.
             These are typically rural villages experiencing:
@@ -135,7 +135,7 @@ def show(df_dept):
     
     # Policy Recommendations
     st.markdown("---")
-    st.header("🎯 Policy Recommendations")
+    st.header("Policy Recommendations")
     
     st.markdown("""
     Based on this analysis, we recommend a **differentiated policy approach** targeting 
@@ -145,7 +145,7 @@ def show(df_dept):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🏙️ For Urban Areas (Low Vacancy)")
+        st.subheader("For Urban Areas (Low Vacancy)")
         
         st.markdown("""
         **Challenge**: Housing shortages, affordability crisis
@@ -167,7 +167,7 @@ def show(df_dept):
         """)
     
     with col2:
-        st.subheader("🌾 For Rural Areas (High Vacancy)")
+        st.subheader("For Rural Areas (High Vacancy)")
         
         st.markdown("""
         **Challenge**: Oversupply, deteriorating housing stock, population decline
@@ -206,7 +206,7 @@ def show(df_dept):
     
     # Data Limitations
     st.markdown("---")
-    st.header("⚠️ Limitations & Future Research")
+    st.header("Limitations & Future Research")
     
     st.warning("""
     **This Analysis Has Limitations**:
@@ -229,13 +229,13 @@ def show(df_dept):
     
     # Call to Action
     st.markdown("---")
-    st.header("📢 Call to Action")
+    st.header("Call to Action")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
-        **🏛️ For Policymakers**
+        **For Policymakers**
         
         Use this data to:
         - Target interventions geographically
@@ -246,7 +246,7 @@ def show(df_dept):
     
     with col2:
         st.markdown("""
-        **🏘️ For Local Officials**
+        **For Local Officials**
         
         Use this data to:
         - Benchmark against similar communes
@@ -257,7 +257,7 @@ def show(df_dept):
     
     with col3:
         st.markdown("""
-        **📊 For Researchers**
+        **For Researchers**
         
         Use this data to:
         - Study housing market dynamics
@@ -269,7 +269,7 @@ def show(df_dept):
     # Final Takeaway
     st.markdown("---")
     st.success("""
-    ### 🎯 Bottom Line
+    ### Bottom Line
     
     France has a **significant vacant housing problem**, but it's not uniform. The solution requires:
     
