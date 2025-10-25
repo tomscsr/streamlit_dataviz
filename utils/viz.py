@@ -53,6 +53,80 @@ def small_multiples(df: pd.DataFrame, facet: str, x: str, y: str, title: str = "
     return _theme_chart(c)
 
 
+def scatter_plot(df: pd.DataFrame, x: str, y: str, color: Optional[str] = None, size: Optional[str] = None, title: str = ""):
+    """Scatter plot with optional color and size encoding."""
+    enc = {
+        "x": alt.X(x, title=x, scale=alt.Scale(zero=False)),
+        "y": alt.Y(y, title=y, scale=alt.Scale(zero=False)),
+        "tooltip": [x, y] + ([color] if color else []) + ([size] if size else []),
+    }
+    if color:
+        enc["color"] = alt.Color(color, legend=alt.Legend(title=color))
+    if size:
+        enc["size"] = alt.Size(size, legend=alt.Legend(title=size))
+    
+    c = alt.Chart(df).mark_circle(opacity=0.7).encode(**enc)
+    return _theme_chart(c)
+
+
+def histogram(df: pd.DataFrame, column: str, bins: int = 30, title: str = ""):
+    """Histogram for distribution analysis."""
+    c = alt.Chart(df).mark_bar().encode(
+        x=alt.X(column, bin=alt.Bin(maxbins=bins), title=column),
+        y=alt.Y("count()", title="Count"),
+        tooltip=["count()"]
+    )
+    return _theme_chart(c)
+
+
+def heatmap(df: pd.DataFrame, x: str, y: str, color: str, title: str = ""):
+    """Heatmap for matrix-style data."""
+    c = alt.Chart(df).mark_rect().encode(
+        x=alt.X(x, title=x),
+        y=alt.Y(y, title=y),
+        color=alt.Color(color, scale=alt.Scale(scheme="viridis"), legend=alt.Legend(title=color)),
+        tooltip=[x, y, color]
+    )
+    return _theme_chart(c)
+
+
+def area_chart(df: pd.DataFrame, x: str, y: str, color: Optional[str] = None, title: str = ""):
+    """Stacked area chart for composition over time."""
+    enc = {
+        "x": alt.X(x, title=x),
+        "y": alt.Y(y, title=title or y, stack="zero"),
+        "tooltip": [x, y] + ([color] if color else []),
+    }
+    if color:
+        enc["color"] = alt.Color(color, legend=alt.Legend(title=color))
+    
+    c = alt.Chart(df).mark_area(opacity=0.7).encode(**enc)
+    return _theme_chart(c)
+
+
+def box_plot(df: pd.DataFrame, x: str, y: str, title: str = ""):
+    """Box plot for distribution comparison across categories."""
+    c = alt.Chart(df).mark_boxplot().encode(
+        x=alt.X(x, title=x),
+        y=alt.Y(y, title=title or y),
+        tooltip=[x, y]
+    )
+    return _theme_chart(c)
+
+
+def horizontal_bar_chart(df: pd.DataFrame, x: str, y: str, color: Optional[str] = None, sort: str = "-x", title: str = ""):
+    """Horizontal bar chart for better label readability."""
+    enc = {
+        "x": alt.X(x, title=title or x),
+        "y": alt.Y(y, sort=sort, title=y),
+        "tooltip": [x, y] + ([color] if color else []),
+    }
+    if color:
+        enc["color"] = color
+    c = alt.Chart(df).mark_bar().encode(**enc)
+    return _theme_chart(c)
+
+
 def map_departements(df_latest_dep: pd.DataFrame, metric_col: str, color_continuous_scale: str = "Viridis"):
     """
     Plotly choropleth for departments. Requires assets/departements.geojson to exist.

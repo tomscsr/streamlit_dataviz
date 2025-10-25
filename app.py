@@ -1,72 +1,63 @@
+"""
+Streamlit Multi-Page App - Vacant Housing in France
+
+This is the entry point for the multi-page Streamlit application.
+Navigate using the sidebar to explore different analysis pages:
+
+- 🏠 Home: Overview and executive summary
+- 🇫🇷 National Trends: France-wide analysis
+- 🗺️ Regional Analysis: Compare regions
+- 📍 Department Analysis: Department-level insights with maps
+- 🏘️ Commune Analysis: Commune-level deep dive
+- 📊 Data Quality: Methodology and validation
+
+The app automatically redirects to the Home page.
+"""
+
 import streamlit as st
-import pandas as pd
-from utils.io import load_data, ensure_departements_geojson
-from utils.prep import build_model
-from sections.intro import render_intro
-from sections.overview import render_overview
-from sections.deep_dives import render_deep_dives
-from sections.conclusions import render_conclusions
 
-st.set_page_config(page_title="Vacant Housing in France — Data Storytelling", layout="wide")
+st.set_page_config(
+    page_title="Vacant Housing in France",
+    page_icon="🏠",
+    layout="wide"
+)
 
-@st.cache_data(show_spinner=False)
-def get_data():
-    df_dep, df_com = load_data()
-    model = build_model(df_dep, df_com)
-    return model
+# Redirect to Home page
+st.info("👈 **Please use the sidebar to navigate between pages**")
 
-# Title and caption
-st.title("Vacant Housing in France: Trends, Places, and Implications")
-st.caption("Source: LOVAC Open Data — public data portal — license presumed Open Data (verify on portal).")
+st.markdown("""
+# Welcome to Vacant Housing in France Dashboard
 
-# Sidebar filters
-with st.sidebar:
-    st.header("Filters")
-    st.write("Tune the scope and metrics; all charts update instantly.")
+This application has been reorganized into **multiple pages** for better storytelling and analysis.
 
-model = get_data()
+## 📚 Navigate Using the Sidebar
 
-# Compute available filter values
-years = sorted(model["years_available"])  # e.g., [2020, 2021, ...]
-regions = ["All"] + sorted(model["regions"])  # LIB_REG values
-metrics = {
-    "Vacant dwellings (count)": "vacant",
-    "Vacant >2 years (count)": "vacant_2y",
-    "Vacancy rate (% of total)": "vacancy_rate",
-    "Long-term vacancy rate (% of total)": "vacancy_2y_rate",
-}
+Use the **sidebar on the left** to access:
 
-with st.sidebar:
-    year_range = st.select_slider("Year range", options=years, value=(min(years), max(years)))
-    region_choice = st.selectbox("Region", regions)
-    metric_choice = st.selectbox("Metric", list(metrics.keys()))
-    top_n = st.slider("Top/Bottom N (for rankings)", min_value=5, max_value=25, value=10)
+- **🏠 Home** - Executive summary and navigation guide
+- **🇫🇷 National Trends** - France-wide analysis with time series and distributions
+- **🗺️ Regional Analysis** - Regional comparisons and heatmaps
+- **📍 Department Analysis** - Interactive maps and department rankings
+- **🏘️ Commune Analysis** - Explore 30,000+ communes with advanced filters
+- **📊 Data Quality** - Methodology, validation, and technical documentation
 
-# Ensure map asset if user wants map (may download on demand)
-ensure_departements_geojson()  # will no-op if already present
+## 🎯 Quick Start
 
-# KPI + Sections
-render_intro(st)
+1. Click on **"🏠 Home"** in the sidebar to start
+2. Use filters on each page to customize your analysis
+3. Download data from various pages as CSV
 
-kpi_scope = {
-    "region": None if region_choice == "All" else region_choice,
-    "year_min": year_range[0],
-    "year_max": year_range[1],
-    "metric": metrics[metric_choice],
-}
+---
 
-render_overview(st, model, kpi_scope)
+### 💡 Pro Tips
 
-render_deep_dives(st, model, {
-    "region": kpi_scope["region"],
-    "metric": metrics[metric_choice],
-    "year_min": kpi_scope["year_min"],
-    "year_max": kpi_scope["year_max"],
-    "top_n": top_n,
-})
+- Each page has **multiple tabs** with different visualizations
+- Use **filters in the sidebar** to focus on specific regions or time periods
+- **Hover over charts** for detailed tooltips
+- **Download buttons** are available on most pages
 
-render_conclusions(st)
+Start exploring now! 👈
+""")
 
-# Data quality and limitations block (always at bottom)
-st.markdown("### Data Quality & Limitations")
-st.info(model["quality_notes"])
+st.markdown("---")
+st.caption("Source: LOVAC Open Data | Built with Streamlit")
