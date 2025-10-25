@@ -82,13 +82,24 @@ France faces a housing paradox: while millions struggle to find affordable housi
 cd streamlit_dataviz
 ```
 
-2. **Install dependencies**
+2. **Install dependencies (pinned)**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Verify data files exist**
+3. **Get the data (download or verify existing)**
+
+Option A — download with script (recommended):
+
+```powershell
+# Set dataset URLs (replace with official data.gouv.fr resource URLs)
+$env:LOVAC_DEPT_URL = "https://.../lovac_opendata_dep.csv"
+$env:LOVAC_COMMUNE_URL = "https://.../lovac-opendata-communes.csv"
+python scripts/data_download.py
+```
+
+Option B — manual: place the CSVs into `data/` yourself.
 
 Ensure the following files are in the `data/` folder:
 - `lovac_opendata_dep.csv` (Department-level data)
@@ -103,6 +114,18 @@ streamlit run app.py
 5. **Open in browser**
 
 The app will automatically open in your default browser at `http://localhost:8501`
+
+## ♻️ Reproducibility & Packaging
+
+- Dependencies are pinned in `requirements.txt` for deterministic installs.
+- Simple run instructions are provided above (no Makefile required). If you prefer a one-liner workflow, you can:
+
+```powershell
+python -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.txt; python scripts/data_download.py; streamlit run app.py
+```
+
+- A small `scripts/data_download.py` fetches the CSVs using environment variables or CLI flags and caches to `data/` (skips if files already exist).
+- `seeds.json` contains deterministic constants (e.g., random seed) should you add any sampling or randomized examples later.
 
 ## 📁 Project Structure
 
@@ -135,6 +158,7 @@ streamlit_dataviz/
 
 **Dataset**: LOVAC (Logements Vacants) - French Vacant Housing Observatory  
 **Portal**: [data.gouv.fr](https://www.data.gouv.fr)  
+> Please replace the placeholders in `scripts/data_download.py` or environment variables with the official dataset resource URLs from data.gouv.fr for full reproducibility.
 **License**: Open License 2.0 (Licence Ouverte)  
 **Coverage**: 2020-2025 (annual data)  
 **Granularity**: 

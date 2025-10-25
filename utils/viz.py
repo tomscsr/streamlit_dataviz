@@ -19,6 +19,13 @@ COLORS = {
     'diverging': ['#d73027', '#fc8d59', '#fee090', '#e0f3f8', '#91bfdb', '#4575b4']
 }
 
+# Default Plotly rendering configuration for Streamlit charts
+# - Hide the Plotly logo
+# - Keep sane defaults without altering interactions
+DEFAULT_PLOTLY_CONFIG = {
+    "displaylogo": False
+}
+
 
 def create_line_chart(df, x, y, title, xlabel=None, ylabel=None, 
                       color=None, height=400, show_markers=True):
@@ -372,7 +379,7 @@ def create_metric_card(value, label, delta=None, delta_color='normal'):
     }
 
 
-def format_number(num, suffix='', decimals=0):
+def format_number(num, suffix='', decimals=0, prefix=''):
     """
     Format large numbers with K/M suffixes.
     
@@ -380,6 +387,7 @@ def format_number(num, suffix='', decimals=0):
         num: Number to format
         suffix: Unit suffix (e.g., '%')
         decimals: Decimal places
+        prefix: Prefix (e.g., '+')
     
     Returns:
         str: Formatted number
@@ -388,8 +396,57 @@ def format_number(num, suffix='', decimals=0):
         return 'N/A'
     
     if abs(num) >= 1_000_000:
-        return f"{num/1_000_000:.{decimals}f}M{suffix}"
+        return f"{prefix}{num/1_000_000:.{decimals}f}M{suffix}"
     elif abs(num) >= 1_000:
-        return f"{num/1_000:.{decimals}f}K{suffix}"
+        return f"{prefix}{num/1_000:.{decimals}f}K{suffix}"
     else:
-        return f"{num:.{decimals}f}{suffix}"
+        return f"{prefix}{num:.{decimals}f}{suffix}"
+
+
+def create_choropleth_map(df, locations, values, title, height=600, 
+                          color_scale='Reds', hover_name=None, hover_data=None):
+    """
+    Create a choropleth map for French departments.
+    
+    Args:
+        df: DataFrame with data
+        locations: Column with department codes (2-digit)
+        values: Column with values to visualize
+        title: Chart title
+        height: Chart height in pixels
+        color_scale: Color scale name
+        hover_name: Column for hover title
+        hover_data: Dict of columns for hover info
+    
+    Returns:
+        plotly figure
+    """
+    # Create the choropleth map using department codes
+    fig = px.choropleth(
+        df,
+        locations=locations,
+        locationmode='geojson-id',
+        color=values,
+        geojson='https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson',
+        featureidkey='properties.code',
+        hover_name=hover_name,
+        hover_data=hover_data,
+        color_continuous_scale=color_scale,
+        title=title,
+        height=height
+    )
+    
+    # Center on France
+    fig.update_geos(
+        fitbounds='locations',
+        visible=False
+    )
+    
+    fig.update_layout(
+        title=dict(font=dict(size=16, weight='bold')),
+        template='plotly_white',
+        font=dict(size=12),
+        margin=dict(l=0, r=0, t=40, b=0)
+    )
+    
+    return fig

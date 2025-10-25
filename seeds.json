@@ -1,0 +1,6 @@
+{
+  "random_seed": 42,
+  "years": [2020, 2021, 2022, 2023, 2024, 2025],
+  "suppressed_value_marker": "s",
+  "notes": "Deterministic constants for sampling or randomized examples if added later."
+}

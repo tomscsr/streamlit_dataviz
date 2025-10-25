@@ -17,10 +17,24 @@ def show(df_dept):
     st.title("Conclusions: Insights & Policy Implications")
     st.markdown("### What we learned and what it means for housing policy")
     
+    st.warning("""
+    **Important Methodological Note**: All conclusions in this section are based on data through 2025, 
+    which represents a partial year. Year-over-year comparisons involving 2025 should be interpreted 
+    with caution as they do not reflect complete annual cycles.
+    """)
+    
     # Prepare summary data
     national_ts = prepare_national_aggregates(df_dept)
-    latest = national_ts[national_ts['year'] == 2025].iloc[0]
+    latest_year = national_ts['year'].max()
+    latest = national_ts[national_ts['year'] == latest_year].iloc[0]
     earliest = national_ts[national_ts['year'] == 2020].iloc[0]
+    full_years = national_ts[national_ts['year'] <= 2024]
+    if not full_years.empty:
+        latest_full_year = full_years['year'].max()
+        latest_full = national_ts[national_ts['year'] == latest_full_year].iloc[0]
+    else:
+        latest_full_year = latest_year
+        latest_full = latest
     
     # Executive Summary
     st.markdown("---")
@@ -30,21 +44,23 @@ def show(df_dept):
     
     with col1:
         st.markdown(f"""
-        This analysis examined **France's vacant housing landscape from 2020-2025**, 
+          This analysis examined **France's vacant housing landscape from 2020-2025**, 
         covering all 101 departments and ~35,000 communes.
         
         **Key Findings:**
         
-        1. **Scale**: France has approximately **{latest['vacant_properties']:,.0f} vacant properties** 
-           as of 2025, representing **{latest['vacancy_rate']:.2f}%** of the total housing stock
+          1. **Scale**: France recorded approximately **{latest_full['vacant_properties']:,.0f} vacant properties** 
+              in {latest_full_year}, representing **{latest_full['vacancy_rate']:.2f}%** of the total housing stock 
+              (2025 figures are a partial-year snapshot of **{latest['vacant_properties']:,.0f} vacant units**).
         
-        2. **Trend**: Vacancy has {'increased' if latest['vacant_properties'] > earliest['vacant_properties'] else 'decreased'} 
-           by **{abs(latest['vacant_properties'] - earliest['vacant_properties']):,.0f} units** 
-           ({abs((latest['vacant_properties'] - earliest['vacant_properties']) / earliest['vacant_properties'] * 100):.1f}%) 
-           since 2020
+          2. **Trend**: Vacancy has {'increased' if latest_full['vacant_properties'] > earliest['vacant_properties'] else 'decreased'} 
+              by **{abs(latest_full['vacant_properties'] - earliest['vacant_properties']):,.0f} units** 
+              ({abs((latest_full['vacant_properties'] - earliest['vacant_properties']) / earliest['vacant_properties'] * 100):.1f}%) 
+              since 2020.
         
-        3. **Structural Problem**: **{latest['longterm_share']:.1f}%** of vacant properties have been 
-           empty for 2+ years, indicating chronic rather than transitional vacancy
+          3. **Structural Problem**: **{latest_full['longterm_share']:.1f}%** of vacant properties were 
+              empty for 2+ years in {latest_full_year}, indicating chronic rather than transitional vacancy 
+              (2025 snapshot: **{latest['longterm_share']:.1f}%**).
         
         4. **Geographic Inequality**: Vacancy rates vary dramatically—from under 5% in growing urban 
            areas to over 15% in declining rural regions
@@ -55,22 +71,25 @@ def show(df_dept):
     
     with col2:
         st.info(f"""
-        **At a Glance (2025)**
+    **Core Metrics ({latest_full_year} full year)**
         
-        **Total Properties:**  
-        **{latest['total_properties']:,.0f}**
+    **Total Properties:**  
+    **{latest_full['total_properties']:,.0f}**
         
-        **Vacant:**  
-        **{latest['vacant_properties']:,.0f}**
+    **Vacant:**  
+    **{latest_full['vacant_properties']:,.0f}**
         
-        **Vacancy Rate:**  
-        **{latest['vacancy_rate']:.2f}%**
+    **Vacancy Rate:**  
+    **{latest_full['vacancy_rate']:.2f}%**
         
-        **Vacant 2+ Years:**  
-        **{latest['vacant_2plus_years']:,.0f}**
+    **Vacant 2+ Years:**  
+    **{latest_full['vacant_2plus_years']:,.0f}**
         
-        **Long-term Rate:**  
-        **{latest['longterm_vacancy_rate']:.2f}%**
+    **Long-term Rate:**  
+    **{latest_full['longterm_vacancy_rate']:.2f}%**
+        
+    **2025 Snapshot (partial year):**
+    {latest['vacant_properties']:,.0f} vacant units | {latest['vacant_2plus_years']:,.0f} vacant 2+ years
         """)
     
     # Major Insights
@@ -105,8 +124,8 @@ def show(df_dept):
         },
         {
             "title": "Vacancy Growing Faster Than Housing Stock",
-            "content": """
-            While France's housing stock grew steadily from 2020-2025, vacant properties increased 
+            "content": f"""
+            While France's housing stock grew steadily from 2020 through {latest_full_year}, vacant properties increased 
             at a faster rate in many regions—suggesting market inefficiencies are worsening.
             
             **Implication**: New construction alone won't solve housing shortages if properties keep 
@@ -116,7 +135,7 @@ def show(df_dept):
         {
             "title": "Small Communes Face Greatest Challenges",
             "content": """
-            Communes with fewer than 500 properties show the highest vacancy rates—often exceeding 15%.
+            Communes with fewer than 500 properties show the highest vacancy rates, often exceeding 15%.
             These are typically rural villages experiencing:
             - Population decline and aging demographics
             - Loss of local services (schools, shops, doctors)
@@ -189,7 +208,7 @@ def show(df_dept):
         """)
     
     # For High Long-term Vacancy
-    st.subheader("⏱️ Specific Measures for Long-term Vacant Properties")
+    st.subheader("Specific Measures for Long-term Vacant Properties")
     
     st.markdown("""
     Properties vacant for **2+ years** require targeted interventions:
@@ -279,17 +298,19 @@ def show(df_dept):
     4. **Data-driven monitoring**: Track metrics over time to evaluate effectiveness
     5. **Multi-stakeholder collaboration**: National frameworks with local implementation
     
-    **With approximately {:.0f} properties sitting empty—including {:.0f} vacant for 2+ years—
+    **With approximately {:.0f} properties sitting empty—including {:.0f} vacant for 2+ years (full-year {latest_full_year} figures)—
     there's enormous potential to address housing needs without new construction** if the right 
     incentives and interventions are deployed strategically.
-    """.format(latest['vacant_properties'], latest['vacant_2plus_years']))
+    """.format(
+        latest_full['vacant_properties'],
+        latest_full['vacant_2plus_years'],
+        latest_full_year=latest_full_year
+    ))
     
     # Acknowledgments
     st.markdown("---")
     st.caption("""
     **Data Source**: LOVAC (Logements Vacants) Open Data, French Government (data.gouv.fr)  
     **License**: Open License 2.0  
-    **Analysis**: Exploratory data analysis and descriptive statistics  
-    **Reproducibility**: All code and methodology are transparent and reproducible  
     **Last Updated**: 2025
     """)

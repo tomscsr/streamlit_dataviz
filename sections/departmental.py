@@ -15,7 +15,8 @@ from utils.viz import (
     create_scatter_plot, 
     create_box_plot,
     create_histogram,
-    format_number
+    format_number,
+    DEFAULT_PLOTLY_CONFIG
 )
 
 
@@ -29,6 +30,11 @@ def show(df_dept):
     
     st.title("Departmental Analysis: Geographic Patterns")
     st.markdown("### Compare vacancy rates across France's 101 departments")
+    
+    st.info("""
+    **Data Notice**: 2025 represents partial year data only. When comparing departments or analyzing trends, 
+    be aware that 2025 vacancy rates are not directly comparable to complete annual data from 2020-2024.
+    """)
     
     # Sidebar filters
     st.sidebar.header("Filters")
@@ -134,7 +140,7 @@ def show(df_dept):
                 height=600,
                 text_auto='.2f'
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
             
             st.dataframe(
                 top_vacant[['LIB_DEP', 'vacancy_rate', 'vacant_properties']].head(10),
@@ -159,7 +165,7 @@ def show(df_dept):
                 height=600,
                 text_auto='.2f'
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
             
             st.dataframe(
                 low_vacant[['LIB_DEP', 'vacancy_rate', 'vacant_properties']].head(10),
@@ -189,7 +195,7 @@ def show(df_dept):
                 height=500,
                 text_auto='.2f'
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         with col2:
             st.markdown("##### Share of Vacancy That Is Long-term")
@@ -206,7 +212,7 @@ def show(df_dept):
                 height=500,
                 text_auto='.1f'
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.info("""
         **Interpretation**: Departments with high long-term vacancy share face structural problems—
@@ -228,7 +234,7 @@ def show(df_dept):
             height=600,
             text_auto=True
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.warning("""
         **Note**: Large departments naturally have more vacant properties in absolute terms. 
@@ -252,7 +258,7 @@ def show(df_dept):
             xlabel='Vacancy Rate (%)',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         # Add classification
         df_snap['vacancy_level'] = df_snap['vacancy_rate'].apply(classify_vacancy_level)
@@ -277,7 +283,7 @@ def show(df_dept):
             ylabel='Vacancy Rate (%)',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         # Summary statistics
         stats = df_snap['vacancy_rate'].describe()
@@ -294,7 +300,7 @@ def show(df_dept):
                 ]
             }),
             hide_index=True,
-            use_container_width=True
+            width='stretch'
         )
     
     # Correlation Analysis
@@ -315,7 +321,7 @@ def show(df_dept):
             ylabel='Vacancy Rate (%)',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.caption("Are larger housing markets more or less efficient?")
     
@@ -332,7 +338,7 @@ def show(df_dept):
             height=400,
             trendline='ols'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.caption("Strong correlation suggests systemic issues in high-vacancy areas.")
     
@@ -363,7 +369,7 @@ def show(df_dept):
             color='LIB_DEP',
             height=500
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
     
     # Full data explorer
     st.markdown("---")
@@ -390,7 +396,7 @@ def show(df_dept):
             'longterm_vacancy_rate': st.column_config.NumberColumn('Long-term Rate (%)', format="%.2f"),
             'longterm_share': st.column_config.NumberColumn('Long-term Share (%)', format="%.1f")
         },
-        use_container_width=True,
+        width='stretch',
         height=400
     )
     

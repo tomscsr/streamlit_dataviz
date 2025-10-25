@@ -116,9 +116,9 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Data Status")
     st.sidebar.success(f"""
-    ✅ Department data: {quality_report['department']['total_rows']} rows  
-    ✅ Commune data: {quality_report['commune']['total_rows']:,} rows  
-    ℹ️ Last update: 2025
+    Department data: {quality_report['department']['total_rows']} rows  
+    Commune data: {quality_report['commune']['total_rows']:,} rows  
+    ℹLast update: 2025
     """)
     
     # Display data quality details in expander
@@ -134,7 +134,7 @@ def main():
     
     # About section in sidebar
     st.sidebar.markdown("---")
-    with st.sidebar.expander("ℹ️ About This Dashboard"):
+    with st.sidebar.expander("About This Dashboard"):
         st.markdown("""
         This interactive dashboard analyzes **vacant housing data** across France 
         from 2020 to 2025, covering:
@@ -161,17 +161,6 @@ def main():
     st.sidebar.metric("Total Vacant Units", f"{total_vacant_2025:,.0f}")
     st.sidebar.metric("Departments Analyzed", len(df_dept))
     
-    # Download section
-    st.sidebar.markdown("---")
-    with st.sidebar.expander("⬇️ Download Data"):
-        st.markdown("""
-        **Data Sources**:
-        - [LOVAC Department Data](https://www.data.gouv.fr)
-        - [LOVAC Commune Data](https://www.data.gouv.fr)
-        
-        **License**: Open License 2.0  
-        Free to use with attribution
-        """)
     
     # Main content area - route to selected page
     st.sidebar.markdown("---")
@@ -195,10 +184,10 @@ def main():
     # Footer
     st.sidebar.markdown("---")
     st.sidebar.caption("""
-    **Built with** ❤️ using Streamlit  
+    **Built with** Streamlit  
     **Data**: French Open Data (data.gouv.fr)  
     **License**: Open License 2.0  
-    © 2025 Data Storytelling Project
+    © 2025 Data Visualization Project - SANCESARIO Tom I2 BIA
     """)
 
 

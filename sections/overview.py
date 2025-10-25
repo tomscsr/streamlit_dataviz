@@ -4,8 +4,20 @@ National overview page: High-level KPIs and trends.
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils.prep import prepare_national_aggregates, prepare_department_timeseries
-from utils.viz import create_line_chart, create_bar_chart, format_number, COLORS
+from utils.prep import (
+    calculate_longterm_vacancy_rate,
+    calculate_vacancy_rate,
+    prepare_department_timeseries,
+    prepare_national_aggregates,
+)
+from utils.viz import (
+    COLORS,
+    create_bar_chart,
+    create_choropleth_map,
+    create_line_chart,
+    format_number,
+    DEFAULT_PLOTLY_CONFIG,
+)
 
 
 def show(df_dept):
@@ -140,9 +152,137 @@ def show(df_dept):
             delta_str
         )
     
+    # Geographic Distribution Map
+    st.markdown("---")
+    st.header("Geographic Distribution of Vacancy")
+
+    available_years = sorted(
+        int(f"20{suffix}")
+        for suffix in ['20', '21', '22', '23', '24', '25']
+        if f'pp_vacant_{suffix}' in df_dept.columns
+    )
+    default_year = latest_year if latest_year in available_years else available_years[-1]
+
+    selected_year = st.select_slider(
+        "Select the year to visualize",
+        options=available_years,
+        value=default_year
+    )
+
+    year_suffix = str(selected_year)[-2:]
+    df_map = df_dept.copy()
+    df_map['dep_code'] = df_map['DEP'].astype(str).str.zfill(2)
+    vacancy_col = f'pp_vacant_{year_suffix}'
+    longterm_col = f'pp_vacant_plus_2ans_{year_suffix}'
+    df_map['vacant_count'] = df_map[vacancy_col]
+    df_map['longterm_vacant_count'] = df_map[longterm_col]
+    df_map['vacancy_rate'] = calculate_vacancy_rate(df_map, year_suffix)
+    df_map['longterm_vacancy_rate'] = calculate_longterm_vacancy_rate(df_map, year_suffix)
+
+    metric_type = st.select_slider(
+        "Choose the metric type",
+        options=["Total number", "Vacancy rate"],
+        value="Total number"
+    )
+
+    vacancy_scope = st.select_slider(
+        "Choose the vacancy scope",
+        options=["All vacant", "Vacant 2+ years"],
+        value="All vacant"
+    )
+
+    if metric_type == "Total number" and vacancy_scope == "All vacant":
+        metric_col = "vacant_count"
+        metric_title = "Vacant Properties"
+        hover_format = ":,.0f"
+        value_formatter = lambda v: f"{v:,.0f}" if pd.notna(v) else "N/A"
+        std_formatter = value_formatter
+    elif metric_type == "Total number" and vacancy_scope == "Vacant 2+ years":
+        metric_col = "longterm_vacant_count"
+        metric_title = "Vacant 2+ Years"
+        hover_format = ":,.0f"
+        value_formatter = lambda v: f"{v:,.0f}" if pd.notna(v) else "N/A"
+        std_formatter = value_formatter
+    elif metric_type == "Vacancy rate" and vacancy_scope == "All vacant":
+        metric_col = "vacancy_rate"
+        metric_title = "Vacancy Rate"
+        hover_format = ":.2f"
+        value_formatter = lambda v: f"{v:.2f}%" if pd.notna(v) else "N/A"
+        std_formatter = lambda v: f"{v:.2f}pp" if pd.notna(v) else "N/A"
+    else:
+        metric_col = "longterm_vacancy_rate"
+        metric_title = "Long-term Vacancy Rate"
+        hover_format = ":.2f"
+        value_formatter = lambda v: f"{v:.2f}%" if pd.notna(v) else "N/A"
+        std_formatter = lambda v: f"{v:.2f}pp" if pd.notna(v) else "N/A"
+
+
+    df_map_valid = df_map[
+        pd.notna(df_map[metric_col]) &
+        np.isfinite(df_map[metric_col])
+    ].copy()
+
+    if len(df_map_valid) > 0:
+        note_lines = [
+            "Use the selectors above to compare overall vacancy and long-term structural vacancy snapshots."
+        ]
+        if selected_year == 2025:
+            note_lines.insert(0, "Note: 2025 figures are based on partial-year data and may appear lower than prior years.")
+        st.info("\n".join(note_lines))
+
+        hover_data = {'dep_code': False, metric_col: hover_format}
+        fig = create_choropleth_map(
+            df_map_valid,
+            locations='dep_code',
+            values=metric_col,
+            title=f'{metric_title} by Department ({selected_year})',
+            height=700,
+            color_scale='Reds',
+            hover_name='LIB_DEP',
+            hover_data=hover_data
+        )
+        
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
+        
+        # Summary stats for map
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            max_idx = df_map_valid[metric_col].idxmax()
+            st.metric(
+                f"Highest {metric_title}",
+                value_formatter(df_map_valid.loc[max_idx, metric_col]),
+                df_map_valid.loc[max_idx, 'LIB_DEP']
+            )
+        
+        with col2:
+            min_idx = df_map_valid[metric_col].idxmin()
+            st.metric(
+                f"Lowest {metric_title}",
+                value_formatter(df_map_valid.loc[min_idx, metric_col]),
+                df_map_valid.loc[min_idx, 'LIB_DEP']
+            )
+        
+        with col3:
+            st.metric(
+                "National Average", 
+                value_formatter(df_map_valid[metric_col].mean())
+            )
+        
+        with col4:
+            st.metric("Std. Deviation", std_formatter(df_map_valid[metric_col].std()))
+    else:
+        st.warning(f"Insufficient data available for {metric_title.lower()} visualization.")
+    
     # Trend Analysis
     st.markdown("---")
     st.header("Trends Over Time")
+    
+    st.warning("""
+    **Important**: 2025 data represents a partial year only. Comparing 2025 vacancy metrics with 
+    previous full-year data (2020-2024) may show misleading trends. Exercise caution when interpreting 
+    year-over-year changes involving 2025.
+    """)
     
     tab1, tab2, tab3 = st.tabs(["Vacancy Trends", "Rates & Composition", "Year-over-Year Changes"])
     
@@ -158,7 +298,7 @@ def show(df_dept):
             ylabel='Number of Properties',
             height=450
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.markdown("""
         **Key Observations:**
@@ -182,7 +322,7 @@ def show(df_dept):
                 ylabel='Vacancy Rate (%)',
                 height=400
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         with col2:
             fig = create_line_chart(
@@ -194,7 +334,7 @@ def show(df_dept):
                 ylabel='% of Vacant Properties',
                 height=400
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.info("""
         **Interpretation**: 
@@ -229,7 +369,7 @@ def show(df_dept):
                 height=400,
                 text_auto=True
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         with col2:
             fig = create_bar_chart(
@@ -242,7 +382,7 @@ def show(df_dept):
                 height=400,
                 text_auto=True
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
     
     # National Summary Statistics
     st.markdown("---")
@@ -263,7 +403,7 @@ def show(df_dept):
                 f"{national_ts['vacancy_rate'].std():.2f}"
             ]
         })
-        st.dataframe(stats_df, hide_index=True, use_container_width=True)
+        st.dataframe(stats_df, hide_index=True, width='stretch')
     
     with col2:
         st.subheader("Long-term Vacancy Statistics")
@@ -278,26 +418,31 @@ def show(df_dept):
                 f"{national_ts['longterm_vacancy_rate'].std():.2f}"
             ]
         })
-        st.dataframe(lt_stats_df, hide_index=True, use_container_width=True)
+        st.dataframe(lt_stats_df, hide_index=True, width='stretch')
     
     # Insights
     st.markdown("---")
     st.header("Key Insights")
     
     # Calculate some insights with NaN handling
-    if (pd.notna(latest_data['total_properties']) and pd.notna(first_data['total_properties']) and 
+    # Use last complete year (<=2024) for historical comparisons
+    full_years = national_ts[national_ts['year'] <= 2024]
+    comparison_year = full_years['year'].max() if not full_years.empty else latest_year
+    comparison_data = national_ts[national_ts['year'] == comparison_year].iloc[0]
+
+    if (pd.notna(comparison_data['total_properties']) and pd.notna(first_data['total_properties']) and
         first_data['total_properties'] > 0):
         total_growth = (
-            (latest_data['total_properties'] - first_data['total_properties']) / 
+            (comparison_data['total_properties'] - first_data['total_properties']) /
             first_data['total_properties'] * 100
         )
     else:
         total_growth = np.nan
-    
-    if (pd.notna(latest_data['vacant_properties']) and pd.notna(first_data['vacant_properties']) and 
+
+    if (pd.notna(comparison_data['vacant_properties']) and pd.notna(first_data['vacant_properties']) and
         first_data['vacant_properties'] > 0):
         vacant_growth = (
-            (latest_data['vacant_properties'] - first_data['vacant_properties']) / 
+            (comparison_data['vacant_properties'] - first_data['vacant_properties']) /
             first_data['vacant_properties'] * 100
         )
     else:
@@ -306,12 +451,12 @@ def show(df_dept):
     col1, col2 = st.columns(2)
     
     with col1:
-        if pd.notna(total_growth) and pd.notna(latest_data['total_properties']) and pd.notna(first_data['total_properties']):
-            property_change = latest_data['total_properties'] - first_data['total_properties']
+        if pd.notna(total_growth) and pd.notna(comparison_data['total_properties']) and pd.notna(first_data['total_properties']):
+            property_change = comparison_data['total_properties'] - first_data['total_properties']
             st.success(f"""
             **Housing Stock Growth**
             
-            From 2020 to 2025, France's total housing stock grew by **{total_growth:.1f}%**, 
+            From 2020 to {comparison_year}, France's total housing stock grew by **{total_growth:.1f}%**, 
             adding approximately **{format_number(property_change)}** 
             new properties to the market.
             """)
@@ -324,14 +469,14 @@ def show(df_dept):
                 st.warning(f"""
                 **Vacancy Growth Concern**
                 
-                Vacant properties increased by **{vacant_growth:.1f}%** over the same period—
+                Vacant properties increased by **{vacant_growth:.1f}%** between 2020 and {comparison_year}—
                 outpacing housing stock growth and suggesting structural market issues.
                 """)
             else:
                 st.success(f"""
                 **Vacancy Improvement**
                 
-                Vacant properties decreased by **{abs(vacant_growth):.1f}%** over the same period—
+                Vacant properties decreased by **{abs(vacant_growth):.1f}%** between 2020 and {comparison_year}—
                 a positive trend indicating improved housing market efficiency.
                 """)
         else:

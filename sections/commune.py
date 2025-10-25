@@ -5,7 +5,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from utils.prep import prepare_commune_snapshot, classify_vacancy_level
-from utils.viz import create_bar_chart, create_histogram, create_box_plot, format_number
+from utils.viz import create_bar_chart, create_histogram, create_box_plot, format_number, DEFAULT_PLOTLY_CONFIG
 
 
 def show(df_commune):
@@ -18,6 +18,11 @@ def show(df_commune):
     
     st.title("Commune Deep Dive: Municipal Analysis")
     st.markdown("### Explore vacant housing at the local level (~35,000 communes)")
+    
+    st.info("""
+    **Data Notice**: Analysis uses 2025 data which represents a partial year. Vacancy rates shown 
+    are based on incomplete year data and should not be compared directly with historical full-year figures.
+    """)
     
     # Prepare commune snapshot
     df_snap = prepare_commune_snapshot(df_commune, year='25')
@@ -149,7 +154,7 @@ def show(df_commune):
             xlabel='Vacancy Rate (%)',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         # Classification
         df_filtered['vacancy_level'] = df_filtered['vacancy_rate'].apply(classify_vacancy_level)
@@ -162,7 +167,7 @@ def show(df_commune):
                 'vacancy_level': 'Vacancy Level',
                 'count': 'Number of Communes'
             },
-            use_container_width=True
+            width='stretch'
         )
     
     with col2:
@@ -175,7 +180,7 @@ def show(df_commune):
             ylabel='Vacancy Rate (%)',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         # Detailed statistics
         stats = df_filtered['vacancy_rate'].describe()
@@ -194,7 +199,7 @@ def show(df_commune):
                 ]
             }),
             hide_index=True,
-            use_container_width=True
+            width='stretch'
         )
     
     # Top and bottom communes
@@ -230,7 +235,7 @@ def show(df_commune):
                 height=600,
                 text_auto='.1f'
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
             
             st.dataframe(
                 top_high[['LIBGEO_25', 'total_properties', 'vacant_properties', 'vacancy_rate', 'longterm_vacancy_rate']],
@@ -242,7 +247,7 @@ def show(df_commune):
                     'vacancy_rate': st.column_config.NumberColumn('Vacancy Rate (%)', format="%.2f"),
                     'longterm_vacancy_rate': st.column_config.NumberColumn('Long-term Rate (%)', format="%.2f")
                 },
-                use_container_width=True
+                width='stretch'
             )
         else:
             st.warning("No communes meet the minimum property threshold.")
@@ -273,7 +278,7 @@ def show(df_commune):
                 height=600,
                 text_auto='.1f'
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
             
             st.dataframe(
                 top_low[['LIBGEO_25', 'total_properties', 'vacant_properties', 'vacancy_rate', 'longterm_vacancy_rate']],
@@ -285,7 +290,7 @@ def show(df_commune):
                     'vacancy_rate': st.column_config.NumberColumn('Vacancy Rate (%)', format="%.2f"),
                     'longterm_vacancy_rate': st.column_config.NumberColumn('Long-term Rate (%)', format="%.2f")
                 },
-                use_container_width=True
+                width='stretch'
             )
         else:
             st.warning("No communes meet the minimum property threshold.")
@@ -304,7 +309,7 @@ def show(df_commune):
             height=600,
             text_auto=True
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
         
         st.dataframe(
             top_absolute[['LIBGEO_25', 'total_properties', 'vacant_properties', 'vacancy_rate']],
@@ -315,7 +320,7 @@ def show(df_commune):
                 'vacant_properties': st.column_config.NumberColumn('Vacant', format="%d"),
                 'vacancy_rate': st.column_config.NumberColumn('Vacancy Rate (%)', format="%.2f")
             },
-            use_container_width=True
+            width='stretch'
         )
     
     # Size class analysis
@@ -342,7 +347,7 @@ def show(df_commune):
     st.dataframe(
         size_stats,
         hide_index=True,
-        use_container_width=True
+        width='stretch'
     )
     
     col1, col2 = st.columns(2)
@@ -356,7 +361,7 @@ def show(df_commune):
             ylabel='Vacancy Rate (%)',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
     
     with col2:
         # Bar chart of mean rates by size
@@ -368,7 +373,7 @@ def show(df_commune):
             height=400,
             text_auto='.1f'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config=DEFAULT_PLOTLY_CONFIG)
     
     st.info("""
     **Insight**: Smaller communes often have higher vacancy rates due to rural depopulation,
@@ -403,7 +408,7 @@ def show(df_commune):
                     'vacancy_rate': st.column_config.NumberColumn('Vacancy Rate (%)', format="%.2f"),
                     'longterm_vacancy_rate': st.column_config.NumberColumn('Long-term Rate (%)', format="%.2f")
                 },
-                use_container_width=True
+                width='stretch'
             )
     
     # Data quality note
